@@ -1,9 +1,11 @@
 package com.haoyong.admin.sys.repository;
 
 import com.haoyong.admin.common.repository.CommonRepository;
-import com.haoyong.admin.sys.entity.SysPermission;
-import com.haoyong.admin.sys.entity.SysUser;
+import com.haoyong.admin.sys.domain.Permission;
+
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * @program: admin
@@ -13,5 +15,11 @@ import org.springframework.stereotype.Repository;
  * @create: 2020-12-08 11:29
  **/
 @Repository
-public interface SysPermissionRepository extends CommonRepository<SysPermission, String> {
+public interface SysPermissionRepository extends CommonRepository<Permission, String> {
+    List<Permission> findByPid(String id);
+
+
+
+
+
 }

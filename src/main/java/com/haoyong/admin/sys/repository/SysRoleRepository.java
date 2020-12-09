@@ -1,8 +1,8 @@
 package com.haoyong.admin.sys.repository;
 
 import com.haoyong.admin.common.repository.CommonRepository;
-import com.haoyong.admin.sys.entity.SysRole;
-import com.haoyong.admin.sys.entity.SysUser;
+import com.haoyong.admin.sys.domain.Role;
+
 import org.springframework.stereotype.Repository;
 
 /**
@@ -13,5 +13,5 @@ import org.springframework.stereotype.Repository;
  * @create: 2020-12-08 11:29
  **/
 @Repository
-public interface SysRoleRepository extends CommonRepository<SysRole, String> {
+public interface SysRoleRepository extends CommonRepository<Role, String> {
 }

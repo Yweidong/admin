@@ -2,7 +2,7 @@ spring:
   application:
     name: admin
   datasource:
-    url: jdbc:mysql://rm-bp10p106cd0u31dm96o.mysql.rds.aliyuncs.com:3306/sys?suseUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false
+    url: jdbc:mysql://rm-bp10p106cd0u31dm96o.mysql.rds.aliyuncs.com:3306/admintest?suseUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false
     username: dongdong
     password: Ywd213886
     type: com.alibaba.druid.pool.DruidDataSource
@@ -22,12 +22,17 @@ spring:
       keep-alive: true
   jpa:
     database: MySQL
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: Asia/Shanghai
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
     show-sql: true
     hibernate:
       naming:
         implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+
 jwt:
   header: Authorization
   tokenHead: 'Bearer '
