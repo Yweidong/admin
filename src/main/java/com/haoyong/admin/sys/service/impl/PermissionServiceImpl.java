@@ -5,9 +5,11 @@ import com.alibaba.fastjson.JSONObject;
 import com.haoyong.admin.common.service.impl.CommonServiceImpl;
 import com.haoyong.admin.sys.domain.Permission;
 import com.haoyong.admin.sys.domain.RolePermission;
+import com.haoyong.admin.sys.domain.User;
 import com.haoyong.admin.sys.repository.SysPermissionRepository;
 import com.haoyong.admin.sys.repository.SysRolePermissionRepository;
 import com.haoyong.admin.sys.service.PermissionService;
+import com.haoyong.admin.sys.service.UserService;
 import com.haoyong.admin.sys.vo.PermissionVo;
 import com.haoyong.admin.util.CopyUtil;
 import com.haoyong.admin.util.MD5Util;
@@ -24,6 +26,7 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -43,9 +46,8 @@ public class PermissionServiceImpl extends CommonServiceImpl<PermissionVo, Permi
         @Autowired
         SysRolePermissionRepository sysRolePermissionRepository;
 
-//
-//    @Autowired
-//    private UserService userService;
+        @Autowired
+        UserService userService;
 
     //获取全部菜单
     @Override
@@ -143,18 +145,18 @@ public class PermissionServiceImpl extends CommonServiceImpl<PermissionVo, Permi
     }
 
 //    //根据用户id获取用户菜单
-//    @Override
-//    public List<String> selectPermissionValueByUserId(String id) {
-//
-//        List<String> selectPermissionValueList = null;
-//        if(this.isSysAdmin(id)) {
-//            //如果是系统管理员，获取所有权限
-//            selectPermissionValueList = baseMapper.selectAllPermissionValue();
-//        } else {
-//            selectPermissionValueList = baseMapper.selectPermissionValueByUserId(id);
-//        }
-//        return selectPermissionValueList;
-//    }
+    @Override
+    public List<String> selectPermissionValueByUserId(String id) {
+
+        List<String> selectPermissionValueList = null;
+        if(this.isSysAdmin(id)) {
+            //如果是系统管理员，获取所有权限
+            selectPermissionValueList = sysPermissionRepository.findAllPermissionValue();
+        } else {
+            selectPermissionValueList = sysPermissionRepository.findPermissionValueByUserId(id);
+        }
+        return selectPermissionValueList;
+    }
 
 //    @Override
 //    public List<JSONObject> selectPermissionByUserId(String userId) {
@@ -176,14 +178,13 @@ public class PermissionServiceImpl extends CommonServiceImpl<PermissionVo, Permi
      * @param userId
      * @return
      */
-//    private boolean isSysAdmin(String userId) {
-//        User user = userService.getById(userId);
-//
-//        if(null != user && "admin".equals(user.getUsername())) {
-//            return true;
-//        }
-//        return false;
-//    }
+    private boolean isSysAdmin(String userId) {
+        Optional<User> optional = userService.findById(userId);
+        if(optional.isPresent() && "admin".equals(optional.get().getUsername())) {
+           return true;
+        }
+        return false;
+    }
 
     /**
      *	递归获取子节点

@@ -1,8 +1,9 @@
 package com.haoyong.admin.secrity.filter;
 
-import com.atguigu.commonutils.R;
-import com.atguigu.commonutils.ResponseUtil;
-import com.atguigu.serurity.security.TokenManager;
+
+import com.haoyong.admin.Enum.ResultStatus;
+import com.haoyong.admin.exception.ResultException;
+import com.haoyong.admin.secrity.security.TokenManager;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -52,13 +53,12 @@ public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
         try {
             authentication = getAuthentication(req);
         } catch (Exception e) {
-            ResponseUtil.out(res, R.error());
+            throw new ResultException(ResultStatus.BAD_REQUEST,e.getMessage());
+
         }
 
         if (authentication != null) {
             SecurityContextHolder.getContext().setAuthentication(authentication);
-        } else {
-            ResponseUtil.out(res, R.error());
         }
         chain.doFilter(req, res);
     }

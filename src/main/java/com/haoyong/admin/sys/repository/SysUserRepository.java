@@ -14,5 +14,6 @@ import org.springframework.stereotype.Repository;
  **/
 @Repository
 public interface SysUserRepository extends CommonRepository<User, String> {
-//    SysUserVo findByUsername(String username);
+    User findByUsername(String username);
+
 }

@@ -1,16 +1,19 @@
 package com.haoyong.admin.secrity.filter;
 
-import com.atguigu.commonutils.R;
-import com.atguigu.commonutils.ResponseUtil;
-import com.atguigu.serurity.entity.SecurityUser;
-import com.atguigu.serurity.entity.User;
-import com.atguigu.serurity.security.TokenManager;
+
+import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.haoyong.admin.secrity.entity.SecurityUser;
+import com.haoyong.admin.secrity.security.TokenManager;
+import com.haoyong.admin.sys.domain.User;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
@@ -19,7 +22,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <p>
@@ -43,6 +49,10 @@ public class TokenLoginFilter extends UsernamePasswordAuthenticationFilter {
         this.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher("/admin/acl/login","POST"));
     }
 
+    /**
+     *
+     * 登录后先到这个方法
+     */
     @Override
     public Authentication attemptAuthentication(HttpServletRequest req, HttpServletResponse res)
             throws AuthenticationException {
@@ -71,8 +81,16 @@ public class TokenLoginFilter extends UsernamePasswordAuthenticationFilter {
         SecurityUser user = (SecurityUser) auth.getPrincipal();
         String token = tokenManager.createToken(user.getCurrentUserInfo().getUsername());
         redisTemplate.opsForValue().set(user.getCurrentUserInfo().getUsername(), user.getPermissionValueList());
+        Map<String,Object> map = new HashMap<String,Object>();
+        map.put("code",200);
+        map.put("message","登录成功");
+        map.put("data",token);
+        res.setContentType("application/json;charset=utf-8");
+        PrintWriter out = res.getWriter();
+        out.write(JSON.toJSONString(map));
+        out.flush();
+        out.close();
 
-        ResponseUtil.out(res, R.ok().data("token", token));
     }
 
     /**
@@ -86,6 +104,21 @@ public class TokenLoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
                                               AuthenticationException e) throws IOException, ServletException {
-        ResponseUtil.out(response, R.error());
+        response.setContentType("application/json;charset=utf-8");
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        PrintWriter out = response.getWriter();
+        Map<String,Object> map = new HashMap<String,Object>();
+        map.put("code",401);
+        if (e instanceof UsernameNotFoundException || e instanceof BadCredentialsException) {
+            map.put("message","用户名或密码错误");
+        } else if (e instanceof DisabledException) {
+            map.put("message","账户被禁用");
+        } else {
+            map.put("message","登录失败!");
+        }
+        map.put("data","操作失败");
+        out.write(JSON.toJSONString(map));
+        out.flush();
+        out.close();
     }
 }

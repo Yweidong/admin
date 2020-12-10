@@ -32,7 +32,20 @@ spring:
       naming:
         implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+  redis:
+    host: 139.224.255.39
+    port: 6379
+    database: 1
+    password:
+    jedis:
+      pool:
+        #最大连接数量
+        max-active: 200
+        #最大空闲数量
+        max-idle: 200
+        #最小空闲数量
+        min-idle: 10
+        #最大等待时间
+        max-wait: 3000ms
 
-jwt:
-  header: Authorization
-  tokenHead: 'Bearer '
+

@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.NoRepositoryBean;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 通用Repository
@@ -15,4 +16,7 @@ import java.util.List;
 @NoRepositoryBean
 public interface CommonRepository<E,T> extends JpaRepository<E,T>, JpaSpecificationExecutor<E> {
     void deleteByIdIn(List<String> ids);
+
+    @Override
+    Optional<E> findById(T t);
 }

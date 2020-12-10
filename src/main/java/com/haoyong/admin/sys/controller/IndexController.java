@@ -1,10 +1,8 @@
 package com.haoyong.admin.sys.controller;
 
 
+import com.haoyong.admin.common.pojo.Result;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/admin/acl/index")
@@ -37,9 +35,9 @@ public class IndexController {
 //        return R.ok().data("permissionList", permissionList);
 //    }
 //
-//    @PostMapping("logout")
-//    public R logout(){
-//        return R.ok();
-//    }
+    @PostMapping("logout")
+    public Result<String> logout(){
+        return Result.success("操作成功");
+    }
 
 }
