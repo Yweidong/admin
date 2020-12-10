@@ -1,0 +1,6 @@
+FROM openjdk:8
+VOLUME /tmp
+MAINTAINER wei_tung
+#ENTRYPOINT ["java","-Dspring.profiles.active=prod","-jar","/usr/local/docker-filedir/jenkins/project/adminapi_project"]
+ENTRYPOINT ["java","-jar","/usr/local/docker-filedir/jenkins/project/admin.jar"]
+EXPOSE 8588
