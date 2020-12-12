@@ -31,7 +31,7 @@ public class PermissionVo {
 
     private Date gmtModified;
 
-    private List<PermissionVo> children = new ArrayList<>();//如果是父类，这里存孩子节点
+    private List<PermissionVo> children;//如果是父类，这里存孩子节点
 
 
 }

@@ -2,23 +2,21 @@ package com.haoyong.admin.sys.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 
+import com.haoyong.admin.common.pojo.Result;
 import com.haoyong.admin.common.service.impl.CommonServiceImpl;
 import com.haoyong.admin.sys.domain.Permission;
 import com.haoyong.admin.sys.domain.RolePermission;
 import com.haoyong.admin.sys.domain.User;
+import com.haoyong.admin.sys.helper.PermissionHelper;
 import com.haoyong.admin.sys.repository.SysPermissionRepository;
 import com.haoyong.admin.sys.repository.SysRolePermissionRepository;
 import com.haoyong.admin.sys.service.PermissionService;
 import com.haoyong.admin.sys.service.UserService;
 import com.haoyong.admin.sys.vo.PermissionVo;
 import com.haoyong.admin.util.CopyUtil;
-import com.haoyong.admin.util.MD5Util;
 import com.haoyong.admin.util.UUIDUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.annotations.SortType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -57,7 +55,7 @@ public class PermissionServiceImpl extends CommonServiceImpl<PermissionVo, Permi
         List<Permission> permissionList = sysPermissionRepository.findAll();
         List<PermissionVo> permissionVos = CopyUtil.copyList(permissionList, PermissionVo.class);
 
-        List<PermissionVo> result = bulid(permissionVos);
+        List<PermissionVo> result = PermissionHelper.getInstance().bulid(permissionVos);
 
         return result;
     }
@@ -136,12 +134,13 @@ public class PermissionServiceImpl extends CommonServiceImpl<PermissionVo, Permi
     //递归删除菜单
     @Override
     @Transactional
-    public void removeChildById(String id) {
+    public Result<String> delete(String id) {
         List<String> idList = new ArrayList<>();
         this.selectChildListById(id, idList);
 
         idList.add(id);
         sysPermissionRepository.deleteByIdIn(idList);
+        return Result.success(id);
     }
 
 //    //根据用户id获取用户菜单
@@ -158,20 +157,21 @@ public class PermissionServiceImpl extends CommonServiceImpl<PermissionVo, Permi
         return selectPermissionValueList;
     }
 
-//    @Override
-//    public List<JSONObject> selectPermissionByUserId(String userId) {
-//        List<Permission> selectPermissionList = null;
-//        if(this.isSysAdmin(userId)) {
-//            //如果是超级管理员，获取所有菜单
-//            selectPermissionList = baseMapper.selectList(null);
-//        } else {
-//            selectPermissionList = baseMapper.selectPermissionByUserId(userId);
-//        }
-//
-//        List<Permission> permissionList = PermissionHelper.bulid(selectPermissionList);
+    @Override
+    public List<JSONObject> selectPermissionByUserId(String userId) {
+        List<Permission> selectPermissionList = null;
+        if(this.isSysAdmin(userId)) {
+            //如果是超级管理员，获取所有菜单
+            selectPermissionList = sysPermissionRepository.findAll();
+        } else {
+            selectPermissionList = sysPermissionRepository.findPermissionByUserId(userId);
+        }
+        List<PermissionVo> permissionVos = CopyUtil.copyList(selectPermissionList, PermissionVo.class);
+        List<PermissionVo> permissionVoList = PermissionHelper.getInstance().bulid(permissionVos);
 //        List<JSONObject> result = MemuHelper.bulid(permissionList);
 //        return result;
-//    }
+        return null;
+    }
 
     /**
      * 判断用户是否系统管理员
@@ -200,43 +200,9 @@ public class PermissionServiceImpl extends CommonServiceImpl<PermissionVo, Permi
         });
     }
 
-    /**
-     * 使用递归方法建菜单
-     * @param treeNodes
-     * @return
-     */
-    private static List<PermissionVo> bulid(List<PermissionVo> treeNodes) {
-        List<PermissionVo> trees = new ArrayList<>();
-        for (PermissionVo treeNode : treeNodes) {
 
-            if ("0".equals(treeNode.getPid())) {
-                treeNode.setLevel(1);
-                trees.add(findChildren(treeNode,treeNodes));
-            }
-        }
-        return trees;
-    }
 
-    /**
-     * 递归查找子节点
-     * @param treeNodes
-     * @return
-     */
-    private static PermissionVo findChildren(PermissionVo treeNode,List<PermissionVo> treeNodes) {
-        treeNode.setChildren(new ArrayList<PermissionVo>());
 
-        for (PermissionVo it : treeNodes) {
-            if(treeNode.getId().equals(it.getPid())) {
-                int level = treeNode.getLevel() + 1;
-                it.setLevel(level);
-                if (treeNode.getChildren() == null) {
-                    treeNode.setChildren(new ArrayList<>());
-                }
-                treeNode.getChildren().add(findChildren(it,treeNodes));
-            }
-        }
-        return treeNode;
-    }
 
 //
 //    private static Permission selectChildren(Permission permissionNode, List<Permission> permissionList) {

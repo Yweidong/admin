@@ -5,6 +5,8 @@ import com.haoyong.admin.sys.domain.Role;
 
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * @program: admin
  * @description:
@@ -14,4 +16,5 @@ import org.springframework.stereotype.Repository;
  **/
 @Repository
 public interface SysRoleRepository extends CommonRepository<Role, String> {
+    List<Role> findByIdIn(List<String> ids);
 }

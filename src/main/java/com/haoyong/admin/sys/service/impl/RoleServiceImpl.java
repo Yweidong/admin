@@ -1,6 +1,13 @@
 package com.haoyong.admin.sys.service.impl;
 
 
+import com.haoyong.admin.common.service.impl.CommonServiceImpl;
+import com.haoyong.admin.sys.domain.Role;
+import com.haoyong.admin.sys.repository.SysRoleRepository;
+import com.haoyong.admin.sys.service.RoleService;
+import com.haoyong.admin.sys.service.UserRoleService;
+import com.haoyong.admin.sys.vo.RoleVo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -19,10 +26,14 @@ import java.util.stream.Collectors;
  * @since 2020-01-12
  */
 @Service
-public class RoleServiceImpl {
+public class RoleServiceImpl extends CommonServiceImpl<RoleVo,Role,String> implements RoleService {
 
-//    @Autowired
-//    private UserRoleService userRoleService;
+    @Autowired
+    SysRoleRepository sysRoleRepository;
+
+
+    @Autowired
+    private UserRoleService userRoleService;
 //
 //
 //    //根据用户获取角色数据
@@ -68,15 +79,15 @@ public class RoleServiceImpl {
 //        userRoleService.saveBatch(userRoleList);
 //    }
 //
-//    @Override
-//    public List<Role> selectRoleByUserId(String id) {
-//        //根据用户id拥有的角色id
-//        List<UserRole> userRoleList = userRoleService.list(new QueryWrapper<UserRole>().eq("user_id", id).select("role_id"));
-//        List<String> roleIdList = userRoleList.stream().map(item -> item.getRoleId()).collect(Collectors.toList());
-//        List<Role> roleList = new ArrayList<>();
-//        if(roleIdList.size() > 0) {
-//            roleList = baseMapper.selectBatchIds(roleIdList);
-//        }
-//        return roleList;
-//    }
+    @Override
+    public List<Role> selectRoleByUserId(String id) {
+        //根据用户id拥有的角色id
+        List<String> userRoleList = userRoleService.getUserRole(id);
+
+        List<Role> roleList = new ArrayList<>();
+        if(userRoleList.size() > 0) {
+            roleList = sysRoleRepository.findByIdIn(userRoleList);
+        }
+        return roleList;
+    }
 }

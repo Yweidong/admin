@@ -3,20 +3,25 @@ package com.haoyong.admin.secrity.config;
 
 import com.haoyong.admin.secrity.filter.TokenAuthenticationFilter;
 import com.haoyong.admin.secrity.filter.TokenLoginFilter;
-import com.haoyong.admin.secrity.security.DefaultPasswordEncoder;
-import com.haoyong.admin.secrity.security.TokenLogoutHandler;
-import com.haoyong.admin.secrity.security.TokenManager;
-import com.haoyong.admin.secrity.security.UnauthorizedEntryPoint;
+import com.haoyong.admin.secrity.security.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.access.AccessDecisionVoter;
+import org.springframework.security.access.vote.RoleVoter;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.core.GrantedAuthorityDefaults;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>
@@ -54,10 +59,13 @@ public class TokenWebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.exceptionHandling()
                 .authenticationEntryPoint(new UnauthorizedEntryPoint())
+//                .and().antMatchers("/api/**",
+//                "/swagger-resources/**", "/webjars/**", "/v2/**", "/swagger-ui.html/**")
+                //不创建会话
+                .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and().csrf().disable()
                 .authorizeRequests()
                 .anyRequest().authenticated()
-                .and().formLogin().permitAll()
                 .and().logout().logoutUrl("/admin/acl/index/logout")
                 .addLogoutHandler(new TokenLogoutHandler(tokenManager,redisTemplate)).and()
                 .addFilter(new TokenLoginFilter(authenticationManager(), tokenManager, redisTemplate))
@@ -85,4 +93,11 @@ public class TokenWebSecurityConfig extends WebSecurityConfigurerAdapter {
                 "/swagger-resources/**", "/webjars/**", "/v2/**", "/swagger-ui.html/**"
                );
     }
+
+    @Bean
+    GrantedAuthorityDefaults grantedAuthorityDefaults() {
+        // Remove the ROLE_ prefix
+        return new GrantedAuthorityDefaults("");
+    }
+
 }

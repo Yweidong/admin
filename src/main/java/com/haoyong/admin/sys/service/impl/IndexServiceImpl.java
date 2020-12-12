@@ -2,6 +2,9 @@ package com.haoyong.admin.sys.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 
+import com.haoyong.admin.sys.domain.Role;
+import com.haoyong.admin.sys.domain.User;
+import com.haoyong.admin.sys.service.IndexService;
 import com.haoyong.admin.sys.service.PermissionService;
 import com.haoyong.admin.sys.service.RoleService;
 import com.haoyong.admin.sys.service.UserService;
@@ -15,19 +18,19 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-public class IndexServiceImpl  {
+public class IndexServiceImpl implements IndexService {
 
-//    @Autowired
-//    private UserService userService;
+    @Autowired
+    private UserService userService;
 //
-//    @Autowired
-//    private RoleService roleService;
+    @Autowired
+    private RoleService roleService;
 //
-//    @Autowired
-//    private PermissionService permissionService;
+    @Autowired
+    private PermissionService permissionService;
 //
-//    @Autowired
-//    private RedisTemplate redisTemplate;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     /**
      * 根据用户名获取用户登录信息
@@ -35,44 +38,45 @@ public class IndexServiceImpl  {
      * @param username
      * @return
      */
-//    public Map<String, Object> getUserInfo(String username) {
-//        Map<String, Object> result = new HashMap<>();
-//        User user = userService.selectByUsername(username);
-//        if (null == user) {
-//            //throw new GuliException(ResultCodeEnum.FETCH_USERINFO_ERROR);
-//        }
-//
-//        //根据用户id获取角色
-//        List<Role> roleList = roleService.selectRoleByUserId(user.getId());
-//        List<String> roleNameList = roleList.stream().map(item -> item.getRoleName()).collect(Collectors.toList());
-//        if(roleNameList.size() == 0) {
-//            //前端框架必须返回一个角色，否则报错，如果没有角色，返回一个空角色
-//            roleNameList.add("");
-//        }
-//
-//        //根据用户id获取操作权限值
+    @Override
+    public Map<String, Object> getUserInfo(String username) {
+        Map<String, Object> result = new HashMap<>();
+        User user = userService.selectByUsername(username);
+        if (null == user) {
+            //throw new GuliException(ResultCodeEnum.FETCH_USERINFO_ERROR);
+        }
+
+        //根据用户id获取角色
+        List<Role> roleList = roleService.selectRoleByUserId(user.getId());
+        List<String> roleNameList = roleList.stream().map(item -> item.getRoleName()).collect(Collectors.toList());
+        if(roleNameList.size() == 0) {
+            //前端框架必须返回一个角色，否则报错，如果没有角色，返回一个空角色
+            roleNameList.add("");
+        }
+
+        //根据用户id获取操作权限值
 //        List<String> permissionValueList = permissionService.selectPermissionValueByUserId(user.getId());
 //        redisTemplate.opsForValue().set(username, permissionValueList);
-//
-//        result.put("name", user.getUsername());
-//        result.put("avatar", "https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif");
-//        result.put("roles", roleNameList);
+
+        result.put("name", user.getUsername());
+        result.put("avatar", "https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif");
+        result.put("roles", roleNameList);
 //        result.put("permissionValueList", permissionValueList);
-//        return result;
-//    }
+        return result;
+    }
 
     /**
      * 根据用户名获取动态菜单
      * @param username
      * @return
      */
-//    public List<JSONObject> getMenu(String username) {
-//        User user = userService.selectByUsername(username);
-//
-//        //根据用户id获取用户菜单权限
-//        List<JSONObject> permissionList = permissionService.selectPermissionByUserId(user.getId());
-//        return permissionList;
-//    }
+    public List<JSONObject> getMenu(String username) {
+        User user = userService.selectByUsername(username);
+
+        //根据用户id获取用户菜单权限
+        List<JSONObject> permissionList = permissionService.selectPermissionByUserId(user.getId());
+        return permissionList;
+    }
 
 
 }

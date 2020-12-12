@@ -41,6 +41,10 @@ public class Result<T> {
         return new Result<T>(resultStatus, data);
     }
 
+    /** 没有权限异常返回业务代码和描述信息 */
+    public static<T> Result<T> authfailure(T data) {
+        return new Result<>(ResultStatus.ACCESS_DEINED,data);
+    }
     /** 业务异常返回业务代码和描述信息 */
     public static <T> Result<T> failure() {
         return new Result<T>(ResultStatus.INTERNAL_SERVER_ERROR, null);

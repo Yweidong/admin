@@ -1,6 +1,7 @@
 package com.haoyong.admin.sys.service;
 
 
+import java.util.List;
 
 /**
  * <p>
@@ -11,5 +12,5 @@ package com.haoyong.admin.sys.service;
  * @since 2020-01-12
  */
 public interface UserRoleService {
-
+    List<String> getUserRole(String userid);
 }
