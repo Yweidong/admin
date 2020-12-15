@@ -52,4 +52,4 @@ server:
 logging:
   config: classpath:logback-spring.xml
   file:
-    path: log/adminlog
+    path: /log/adminlog
