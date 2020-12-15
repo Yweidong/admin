@@ -41,7 +41,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
         <!--添加servlet-api的依赖,用来打war包  -->
         <dependency>
             <groupId>javax.servlet</groupId>
