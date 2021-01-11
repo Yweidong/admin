@@ -3,9 +3,12 @@ package com.haoyong.admin.secrity.filter;
 
 import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.haoyong.admin.infrastructure.RedisKey;
 import com.haoyong.admin.secrity.entity.SecurityUser;
 import com.haoyong.admin.secrity.security.TokenManager;
 import com.haoyong.admin.sys.domain.User;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -13,9 +16,14 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -24,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,17 +44,21 @@ import java.util.Map;
  * @author qy
  * @since 2019-11-08
  */
+@Slf4j
 public class TokenLoginFilter extends UsernamePasswordAuthenticationFilter {
+
+
 
     private AuthenticationManager authenticationManager;
     private TokenManager tokenManager;
-    private RedisTemplate redisTemplate;
 
-    public TokenLoginFilter(AuthenticationManager authenticationManager, TokenManager tokenManager, RedisTemplate redisTemplate) {
+
+    public TokenLoginFilter(AuthenticationManager authenticationManager, TokenManager tokenManager) {
         this.authenticationManager = authenticationManager;
         this.tokenManager = tokenManager;
-        this.redisTemplate = redisTemplate;
+
         this.setPostOnly(false);
+
         this.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher("/admin/acl/login","POST"));
     }
 
@@ -56,7 +69,10 @@ public class TokenLoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     public Authentication attemptAuthentication(HttpServletRequest req, HttpServletResponse res)
             throws AuthenticationException {
+
+
         try {
+
             User user = new ObjectMapper().readValue(req.getInputStream(), User.class);
 
             return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(), new ArrayList<>()));
@@ -78,9 +94,15 @@ public class TokenLoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res, FilterChain chain,
                                             Authentication auth) throws IOException, ServletException {
+
         SecurityUser user = (SecurityUser) auth.getPrincipal();
-        String token = tokenManager.createToken(user.getCurrentUserInfo().getUsername());
-        redisTemplate.opsForValue().set(user.getCurrentUserInfo().getUsername(), user.getPermissionValueList());
+        String token = tokenManager.createToken(
+                user.getCurrentUserInfo().getUsername(),
+                user.getCurrentUserInfo().getId(),
+                user.getPermissionValueList()
+
+        );
+
         Map<String,Object> map = new HashMap<String,Object>();
         map.put("code",200);
         map.put("message","登录成功");

@@ -1,13 +1,12 @@
 package com.haoyong.admin.sys.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
-
 import com.haoyong.admin.sys.domain.Role;
 import com.haoyong.admin.sys.domain.User;
 import com.haoyong.admin.sys.service.IndexService;
 import com.haoyong.admin.sys.service.PermissionService;
 import com.haoyong.admin.sys.service.RoleService;
 import com.haoyong.admin.sys.service.UserService;
+import com.haoyong.admin.sys.vo.PermissionVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -59,7 +58,7 @@ public class IndexServiceImpl implements IndexService {
 //        redisTemplate.opsForValue().set(username, permissionValueList);
 
         result.put("name", user.getUsername());
-        result.put("avatar", "https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif");
+        result.put("avatar", user.getSalt());
         result.put("roles", roleNameList);
 //        result.put("permissionValueList", permissionValueList);
         return result;
@@ -70,12 +69,12 @@ public class IndexServiceImpl implements IndexService {
      * @param username
      * @return
      */
-    public List<JSONObject> getMenu(String username) {
+    public List<PermissionVo> getMenu(String username) {
         User user = userService.selectByUsername(username);
 
         //根据用户id获取用户菜单权限
-        List<JSONObject> permissionList = permissionService.selectPermissionByUserId(user.getId());
-        return permissionList;
+        List<PermissionVo> permissionVos = permissionService.selectPermissionByUserId(user.getId());
+        return permissionVos;
     }
 
 

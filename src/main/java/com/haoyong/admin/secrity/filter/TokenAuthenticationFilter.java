@@ -3,7 +3,9 @@ package com.haoyong.admin.secrity.filter;
 
 import com.haoyong.admin.Enum.ResultStatus;
 import com.haoyong.admin.exception.ResultException;
+import com.haoyong.admin.infrastructure.RedisKey;
 import com.haoyong.admin.secrity.security.TokenManager;
+import io.jsonwebtoken.Claims;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -32,17 +34,18 @@ import java.util.List;
  */
 public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
     private TokenManager tokenManager;
-    private RedisTemplate redisTemplate;
-
-    public TokenAuthenticationFilter(AuthenticationManager authManager, TokenManager tokenManager,RedisTemplate redisTemplate) {
+//    private RedisTemplate redisTemplate;
+//
+    public TokenAuthenticationFilter(AuthenticationManager authManager, TokenManager tokenManager) {
         super(authManager);
         this.tokenManager = tokenManager;
-        this.redisTemplate = redisTemplate;
+//        this.redisTemplate = redisTemplate;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
             throws IOException, ServletException {
+
         logger.info("================="+req.getRequestURI());
         if(req.getRequestURI().indexOf("admin") == -1) {
             chain.doFilter(req, res);
@@ -53,10 +56,10 @@ public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
         try {
             authentication = getAuthentication(req);
         } catch (Exception e) {
-            throw new ResultException(ResultStatus.BAD_REQUEST,e.getMessage());
+           e.printStackTrace();
 
         }
-
+//
         if (authentication != null) {
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
@@ -67,9 +70,10 @@ public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
         // token置于header里
         String token = request.getHeader("token");
         if (token != null && !"".equals(token.trim())) {
-            String userName = tokenManager.getUserFromToken(token);
+            Claims claims = tokenManager.parseJWT(token);
+            String userName = claims.getSubject();
 
-            List<String> permissionValueList = (List<String>) redisTemplate.opsForValue().get(userName);
+            List<String> permissionValueList = (List<String>) claims.get("roleList");
             Collection<GrantedAuthority> authorities = new ArrayList<>();
             for(String permissionValue : permissionValueList) {
                 if(StringUtils.isEmpty(permissionValue)) continue;

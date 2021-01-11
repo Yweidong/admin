@@ -7,6 +7,7 @@ import javax.persistence.Column;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @program: admin
@@ -26,8 +27,10 @@ public class PermissionVo {
     private String component;
     private String icon;
     private Integer status;
-    private Integer level;
+//    private Integer level;
+    private Map<String,Object> meta;
     private Date gmtCreate;
+
 
     private Date gmtModified;
 

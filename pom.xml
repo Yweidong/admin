@@ -13,40 +13,33 @@
     <version>1.0</version>
     <name>admin</name>
     <description>Demo project for Spring Boot</description>
-    <packaging>war</packaging>
+
     <properties>
         <java.version>1.8</java.version>
         <fastjson.version>1.2.35</fastjson.version>
         <druid.version>1.1.10</druid.version>
         <commons-beanutils.version>1.8.0</commons-beanutils.version>
         <commons-collections.version>3.2.2</commons-collections.version>
+        <commons-lang3.version>3.3.2</commons-lang3.version>
         <mysql.version>8.0.12</mysql.version>
         <jjwt.version>0.9.1</jjwt.version>
         <hutool.version>4.5.6</hutool.version>
-        <!--docker镜像的前缀-->
-        <docker.image.prefix>docker</docker.image.prefix>
+
 
         <swagger.version>2.7.0</swagger.version>
     </properties>
 
     <dependencies>
-
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-tomcat</artifactId>
-                </exclusion>
-            </exclusions>
+
         </dependency>
-        <!--添加servlet-api的依赖,用来打war包  -->
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
+
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -83,6 +76,13 @@
             <artifactId>commons-collections</artifactId>
             <version>${commons-collections.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
+        </dependency>
+
+
 
         <dependency>
             <groupId>mysql</groupId>
@@ -141,18 +141,7 @@
             <artifactId>assertj-core</artifactId>
         </dependency>
 
-        <!--swagger-->
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-            <version>${swagger.version}</version>
-        </dependency>
-        <!--swagger ui-->
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger-ui</artifactId>
-            <version>${swagger.version}</version>
-        </dependency>
+
     </dependencies>
 
     <build>

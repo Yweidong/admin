@@ -1,11 +1,22 @@
 package com.haoyong.admin.secrity.security;
 
-import io.jsonwebtoken.CompressionCodecs;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.haoyong.admin.Enum.ResultStatus;
+import com.haoyong.admin.exception.ResultException;
+import com.haoyong.admin.infrastructure.RedisKey;
+import io.jsonwebtoken.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.cache.CacheProperties;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.StringJoiner;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -18,23 +29,51 @@ import java.util.Date;
 @Component
 public class TokenManager {
 
-    private long tokenExpiration = 2*60*60*1000;
-//    private long tokenExpiration = 60*1000;
-    private String tokenSignKey = "123456";
 
-    public String createToken(String username) {
-        String token = Jwts.builder().setSubject(username)
-                .setExpiration(new Date(System.currentTimeMillis() + tokenExpiration))
-                .signWith(SignatureAlgorithm.HS512, tokenSignKey).compressWith(CompressionCodecs.GZIP).compact();
-        return token;
+
+    @Value ("${jwt.expire}")
+    private long tokenExpiration;
+
+    private String tokenSignKey = "jwt_token";
+
+
+
+    public String createToken(String username, String userid, List<String> list) {
+        String token = null;
+        try {
+            token = Jwts.builder()
+                    .setId(userid)//JWT_ID
+                    .setSubject(username)//主题
+                    .claim("roleList",list)//自定义属性
+                    .setExpiration(new Date(System.currentTimeMillis() + tokenExpiration))
+                    .signWith(SignatureAlgorithm.HS256, tokenSignKey)
+                    .compressWith(CompressionCodecs.GZIP).compact();
+        } catch (Exception e) {
+
+            throw new ResultException(ResultStatus.BAD_REQUEST,"签名失败");
+        }
+
+        return  token;
+
     }
 
-    public String getUserFromToken(String token) {
-        String user = Jwts.parser().setSigningKey(tokenSignKey).parseClaimsJws(token).getBody().getSubject();
-        return user;
+
+    public Claims parseJWT(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(tokenSignKey)
+                    .parseClaimsJws(token)
+                    .getBody();
+            return claims;
+        } catch (ExpiredJwtException e) {
+            throw new ResultException(ResultStatus.BAD_REQUEST,"token过期,请重新登录");
+        } catch (Exception e) {
+            throw new ResultException(ResultStatus.BAD_REQUEST,"token解析异常");
+        }
     }
 
-    public void removeToken(String token) {
+    public void removeToken(String token,String username) {
+
         //jwttoken无需删除，客户端扔掉即可。
     }
 

@@ -29,7 +29,7 @@ import java.util.List;
  * @author qy
  * @since 2019-11-08
  */
-@Service("userDetailsService")
+@Service("userDetailService")
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired

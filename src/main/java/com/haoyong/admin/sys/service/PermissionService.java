@@ -1,6 +1,5 @@
 package com.haoyong.admin.sys.service;
 
-import com.alibaba.fastjson.JSONObject;
 import com.haoyong.admin.common.pojo.Result;
 import com.haoyong.admin.common.service.CommonService;
 import com.haoyong.admin.sys.domain.Permission;
@@ -34,7 +33,7 @@ public interface PermissionService extends CommonService<PermissionVo,Permission
 //    //根据用户id获取用户菜单
     List<String> selectPermissionValueByUserId(String id);
 //
-    List<JSONObject> selectPermissionByUserId(String id);
+    List<PermissionVo> selectPermissionByUserId(String id);
 //
 //    //获取全部菜单
 //    List<Permission> queryAllMenuGuli();

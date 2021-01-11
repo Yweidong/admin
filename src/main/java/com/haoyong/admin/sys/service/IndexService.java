@@ -1,6 +1,6 @@
 package com.haoyong.admin.sys.service;
 
-import com.alibaba.fastjson.JSONObject;
+import com.haoyong.admin.sys.vo.PermissionVo;
 
 import java.util.List;
 import java.util.Map;
@@ -19,6 +19,6 @@ public interface IndexService {
      * @param username
      * @return
      */
-    List<JSONObject> getMenu(String username);
+    List<PermissionVo> getMenu(String username);
 
 }

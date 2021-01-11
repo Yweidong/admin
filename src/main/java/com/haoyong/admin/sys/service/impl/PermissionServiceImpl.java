@@ -1,7 +1,5 @@
 package com.haoyong.admin.sys.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
-
 import com.haoyong.admin.common.pojo.Result;
 import com.haoyong.admin.common.service.impl.CommonServiceImpl;
 import com.haoyong.admin.sys.domain.Permission;
@@ -158,7 +156,7 @@ public class PermissionServiceImpl extends CommonServiceImpl<PermissionVo, Permi
     }
 
     @Override
-    public List<JSONObject> selectPermissionByUserId(String userId) {
+    public List<PermissionVo> selectPermissionByUserId(String userId) {
         List<Permission> selectPermissionList = null;
         if(this.isSysAdmin(userId)) {
             //如果是超级管理员，获取所有菜单
@@ -168,9 +166,8 @@ public class PermissionServiceImpl extends CommonServiceImpl<PermissionVo, Permi
         }
         List<PermissionVo> permissionVos = CopyUtil.copyList(selectPermissionList, PermissionVo.class);
         List<PermissionVo> permissionVoList = PermissionHelper.getInstance().bulid(permissionVos);
-//        List<JSONObject> result = MemuHelper.bulid(permissionList);
-//        return result;
-        return null;
+
+        return permissionVoList;
     }
 
     /**

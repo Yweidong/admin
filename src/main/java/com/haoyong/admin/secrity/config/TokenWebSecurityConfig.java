@@ -1,10 +1,14 @@
 package com.haoyong.admin.secrity.config;
 
 
+
+
+import com.haoyong.admin.secrity.filter.CorsRequestFilter;
 import com.haoyong.admin.secrity.filter.TokenAuthenticationFilter;
 import com.haoyong.admin.secrity.filter.TokenLoginFilter;
 import com.haoyong.admin.secrity.security.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -19,6 +23,9 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.core.GrantedAuthorityDefaults;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsUtils;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,15 +46,15 @@ public class TokenWebSecurityConfig extends WebSecurityConfigurerAdapter {
     private UserDetailsService userDetailsService;
     private TokenManager tokenManager;
     private DefaultPasswordEncoder defaultPasswordEncoder;
-    private RedisTemplate redisTemplate;
+
 
     @Autowired
-    public TokenWebSecurityConfig(UserDetailsService userDetailsService, DefaultPasswordEncoder defaultPasswordEncoder,
-                                  TokenManager tokenManager, RedisTemplate redisTemplate) {
+    public TokenWebSecurityConfig(@Qualifier("userDetailService") UserDetailsService userDetailsService, DefaultPasswordEncoder defaultPasswordEncoder,
+                                  TokenManager tokenManager) {
         this.userDetailsService = userDetailsService;
         this.defaultPasswordEncoder = defaultPasswordEncoder;
         this.tokenManager = tokenManager;
-        this.redisTemplate = redisTemplate;
+
     }
 
     /**
@@ -57,19 +64,20 @@ public class TokenWebSecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.exceptionHandling()
+        http
+                .exceptionHandling()
                 .authenticationEntryPoint(new UnauthorizedEntryPoint())
-//                .and().antMatchers("/api/**",
-//                "/swagger-resources/**", "/webjars/**", "/v2/**", "/swagger-ui.html/**")
                 //不创建会话
                 .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and().csrf().disable()
                 .authorizeRequests()
+                .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                 .anyRequest().authenticated()
                 .and().logout().logoutUrl("/admin/acl/index/logout")
-                .addLogoutHandler(new TokenLogoutHandler(tokenManager,redisTemplate)).and()
-                .addFilter(new TokenLoginFilter(authenticationManager(), tokenManager, redisTemplate))
-                .addFilter(new TokenAuthenticationFilter(authenticationManager(), tokenManager, redisTemplate)).httpBasic();
+                .addLogoutHandler(new TokenLogoutHandler(tokenManager)).and()
+                .addFilterBefore(new CorsRequestFilter(),UsernamePasswordAuthenticationFilter.class)
+                .addFilter(new TokenLoginFilter(authenticationManager(), tokenManager))
+                .addFilter(new TokenAuthenticationFilter(authenticationManager(), tokenManager)).httpBasic();
     }
 
     /**
@@ -99,5 +107,8 @@ public class TokenWebSecurityConfig extends WebSecurityConfigurerAdapter {
         // Remove the ROLE_ prefix
         return new GrantedAuthorityDefaults("");
     }
+
+
+
 
 }

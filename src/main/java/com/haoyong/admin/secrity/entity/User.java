@@ -18,7 +18,7 @@ import java.io.Serializable;
 public class User implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-
+	private String id;
 //	@ApiModelProperty(value = "微信openid")
 	private String username;
 

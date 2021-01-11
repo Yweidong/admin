@@ -3,7 +3,9 @@ package com.haoyong.admin.sys.helper;
 import com.haoyong.admin.sys.vo.PermissionVo;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @program: admin
@@ -18,6 +20,7 @@ public class PermissionHelper {
         return INSTANCE;
     }
 
+
     /**
      * 使用递归方法建菜单
      * @param treeNodes
@@ -28,10 +31,17 @@ public class PermissionHelper {
         for (PermissionVo treeNode : treeNodes) {
 
             if ("0".equals(treeNode.getPid())) {
-                treeNode.setLevel(1);
+
+                Map<String,Object> map = new HashMap<>();
+
+                map.put("title",treeNode.getName());
+                map.put("icon",treeNode.getIcon());
+                treeNode.setMeta(map);
+
                 trees.add(findChildren(treeNode,treeNodes));
             }
         }
+
         return trees;
     }
 
@@ -45,13 +55,22 @@ public class PermissionHelper {
 
         for (PermissionVo it : treeNodes) {
             if(treeNode.getId().equals(it.getPid())) {
-                int level = treeNode.getLevel() + 1;
-                it.setLevel(level);
+
+
                 if (treeNode.getChildren() == null) {
                     treeNode.setChildren(new ArrayList<>());
                 }
+
                 treeNode.getChildren().add(findChildren(it,treeNodes));
+
+
             }
+            Map<String,Object> map = new HashMap<>();
+
+            map.put("title",treeNode.getName());
+            map.put("icon",treeNode.getIcon());
+            treeNode.setMeta(map);
+
         }
         return treeNode;
     }
