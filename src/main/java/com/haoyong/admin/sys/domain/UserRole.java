@@ -1,5 +1,6 @@
 package com.haoyong.admin.sys.domain;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.haoyong.admin.Enum.DelStatus;
 import org.springframework.data.annotation.CreatedDate;
@@ -27,6 +28,7 @@ public class UserRole implements Serializable {
 	 * 主键id
 	 */
 	@Id
+
    	@Column(name = "id" )
 	private String id;
 
@@ -49,6 +51,8 @@ public class UserRole implements Serializable {
 //   	@Column(name = "is_deleted" )
 //	private DelStatus isDeleted;
 
+
+	
 	/**
 	 * 创建时间
 	 */
