@@ -1,8 +1,10 @@
 package com.haoyong.admin.secrity.service;
 
 
-import com.haoyong.admin.Enum.ResultStatus;
-import com.haoyong.admin.exception.ResultException;
+import com.haoyong.admin.Enum.CommonEnum;
+
+import com.haoyong.admin.exception.BizException;
+
 import com.haoyong.admin.secrity.entity.SecurityUser;
 
 
@@ -50,7 +52,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         // 判断用户是否存在
         if (null == user){
-            throw new ResultException(ResultStatus.BAD_REQUEST,"用户名不存在");
+            throw new BizException(CommonEnum.BODY_NOT_MATCH.getResultCode(),"用户名不存在");
 
         }
         // 返回UserDetails实现类

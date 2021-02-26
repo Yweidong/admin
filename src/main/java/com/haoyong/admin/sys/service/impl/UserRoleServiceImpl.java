@@ -24,6 +24,6 @@ public class UserRoleServiceImpl implements UserRoleService {
 
     @Override
     public List<String> getUserRole(String userid) {
-       return sysUserRoleRepository.findByUserId(userid);
+       return sysUserRoleRepository.findByUserIdNew(userid);
     }
 }

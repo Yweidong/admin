@@ -1,8 +1,7 @@
 package com.haoyong.admin.secrity.filter;
 
 
-import com.haoyong.admin.Enum.ResultStatus;
-import com.haoyong.admin.exception.ResultException;
+
 import com.haoyong.admin.infrastructure.RedisKey;
 import com.haoyong.admin.secrity.security.TokenManager;
 import io.jsonwebtoken.Claims;
@@ -72,7 +71,7 @@ public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
         if (token != null && !"".equals(token.trim())) {
             Claims claims = tokenManager.parseJWT(token);
             String userName = claims.getSubject();
-
+            String userId = claims.getId();
             List<String> permissionValueList = (List<String>) claims.get("roleList");
             Collection<GrantedAuthority> authorities = new ArrayList<>();
             for(String permissionValue : permissionValueList) {
@@ -82,7 +81,7 @@ public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
             }
 
             if (!StringUtils.isEmpty(userName)) {
-                return new UsernamePasswordAuthenticationToken(userName, token, authorities);
+                return new UsernamePasswordAuthenticationToken(userName, userId, authorities);
             }
             return null;
         }

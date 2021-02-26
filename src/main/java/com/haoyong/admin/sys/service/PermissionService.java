@@ -1,7 +1,7 @@
 package com.haoyong.admin.sys.service;
 
-import com.haoyong.admin.common.pojo.Result;
-import com.haoyong.admin.common.service.CommonService;
+
+import com.alibaba.fastjson.JSONObject;
 import com.haoyong.admin.sys.domain.Permission;
 import com.haoyong.admin.sys.vo.PermissionVo;
 
@@ -16,31 +16,34 @@ import java.util.List;
  * @author testjava
  * @since 2020-01-12
  */
-public interface PermissionService extends CommonService<PermissionVo,Permission,String> {
+public interface PermissionService  {
 
     //获取全部菜单
     List<PermissionVo> queryAllMenu();
 
 //    //根据角色获取菜单
-//    List<Permission> selectAllMenu(String roleId);
+    List<PermissionVo> selectAllMenu(String roleId);
 //
 //    //给角色分配权限
     void saveRolePermissionRealtionShip(String roleId, String permissionId);
-//
-//    //递归删除菜单
-    Result<String> delete(String id);
+
+    //添加菜单功能
+    boolean addMenu(Permission permission);
+
+    //修改菜单
+
+    boolean updateMenu(Permission permission);
+
+   //删除菜单
+    boolean delete(String id);
 //
 //    //根据用户id获取用户菜单
     List<String> selectPermissionValueByUserId(String id);
-//
-    List<PermissionVo> selectPermissionByUserId(String id);
-//
-//    //获取全部菜单
-//    List<Permission> queryAllMenuGuli();
-//
-//    //递归删除菜单
-//    void removeChildByIdGuli(String id);
-//
-//    //给角色分配权限
-//    void saveRolePermissionRealtionShipGuli(String roleId, String[] permissionId);
+
+
+
+//    树形结构
+    List<PermissionVo> selectMenuTreeByUserId(String id);
+    //后台菜单栏结构
+    List<JSONObject> selectAdminMenu(String id);
 }

@@ -12,6 +12,7 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,10 +36,11 @@ public class TokenLogoutHandler implements LogoutHandler {
 
     }
 
-    @SneakyThrows
+
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         String token = request.getHeader("token");
+
         if (token != null) {
 //            if (authentication != null) {
 //                String username = (String) authentication.getPrincipal();
@@ -51,8 +53,13 @@ public class TokenLogoutHandler implements LogoutHandler {
             map.put("message","退出成功");
             map.put("data",authentication);
             response.setContentType("application/json;charset=utf-8");
-
-            PrintWriter out = response.getWriter();
+            response.setHeader("Access-Control-Allow-Origin","*");
+            PrintWriter out = null;
+            try {
+                out = response.getWriter();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             out.write(JSON.toJSONString(map));
             out.flush();
             out.close();

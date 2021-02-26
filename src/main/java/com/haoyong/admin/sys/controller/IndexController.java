@@ -2,11 +2,10 @@ package com.haoyong.admin.sys.controller;
 
 
 
-import com.haoyong.admin.annotation.MyLogAnno;
-import com.haoyong.admin.common.pojo.Result;
-import com.haoyong.admin.infrastructure.LogType;
+import com.alibaba.fastjson.JSONObject;
+import com.haoyong.admin.common.ResultBody;
+
 import com.haoyong.admin.sys.service.IndexService;
-import com.haoyong.admin.sys.vo.PermissionVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -29,13 +28,17 @@ public class IndexController {
      * SecurityContextHolder.getContext().getAuthentication().getPrincipal()    登录账号
      */
     @GetMapping("info")
-    public Result<Object> info(Authentication authentication){
+    public ResultBody<Map<String, Object>> info(Authentication authentication){
         //获取当前登录用户用户名
-
+        /**
+         * principal   "admin"
+         * credentials  token的值
+         * authorities  权限列表
+         */
         String username = authentication.getName();
 
         Map<String, Object> userInfo = indexService.getUserInfo(username);
-        return Result.success(userInfo);
+        return ResultBody.success(userInfo);
     }
 
     /**
@@ -44,18 +47,18 @@ public class IndexController {
      */
 
     @GetMapping("menu")
-    public Result<List<PermissionVo>> getMenu(Authentication authentication){
+    public ResultBody<List<JSONObject>> getMenu(Authentication authentication){
         //获取当前登录用户用户名
 //        String username = SecurityContextHolder.getContext().getAuthentication().getName();
         String username = authentication.getName();
 
-        List<PermissionVo> menulist = indexService.getMenu(username);
-        return Result.success(menulist);
+        List<JSONObject> menu = indexService.getMenu(username);
+        return ResultBody.success(menu);
     }
 
     @PostMapping("logout")
-    public Result<String> logout(){
-        return Result.success("操作成功");
+    public ResultBody<String> logout(){
+        return ResultBody.success("退出成功");
     }
 
 }

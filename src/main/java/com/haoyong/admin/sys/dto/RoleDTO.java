@@ -1,9 +1,6 @@
-package com.haoyong.admin.sys.vo;
+package com.haoyong.admin.sys.dto;
 
 import lombok.Data;
-
-import javax.validation.constraints.NotNull;
-import java.util.Date;
 
 /**
  * @program: admin
@@ -13,8 +10,7 @@ import java.util.Date;
  * @create: 2020-12-11 14:48
  **/
 @Data
-public class RoleVo {
+public class RoleDTO {
     private String id;
-
     private String roleName;
 }

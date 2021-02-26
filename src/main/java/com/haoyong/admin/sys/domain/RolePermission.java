@@ -2,6 +2,8 @@ package com.haoyong.admin.sys.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.haoyong.admin.Enum.DelStatus;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -19,6 +21,8 @@ import java.util.Date;
 @Entity
 @Table ( name ="sys_role_permission" )
 @EntityListeners(AuditingEntityListener.class)
+@DynamicUpdate
+@DynamicInsert
 public class RolePermission implements Serializable {
 
 	private static final long serialVersionUID = 3860841800915248464L;

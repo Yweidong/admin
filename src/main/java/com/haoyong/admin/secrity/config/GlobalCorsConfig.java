@@ -29,7 +29,7 @@ public class GlobalCorsConfig {
                         .allowedOrigins("*")
                         .allowedMethods("PUT", "DELETE","POST","GET","OPTIONS")
                         .allowedHeaders("*")
-                        .allowCredentials(false).maxAge(3600);
+                        .allowCredentials(true).maxAge(3600);
             }
         };
     }

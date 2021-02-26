@@ -1,16 +1,18 @@
 package com.haoyong.admin.sys.controller;
 
 
-import com.haoyong.admin.common.controller.CommonController;
-import com.haoyong.admin.common.pojo.Result;
+import com.haoyong.admin.Enum.CommonEnum;
+import com.haoyong.admin.common.ResultBody;
+
 import com.haoyong.admin.sys.domain.Permission;
 import com.haoyong.admin.sys.dto.RolePermissionDTO;
 import com.haoyong.admin.sys.service.PermissionService;
 import com.haoyong.admin.sys.vo.PermissionVo;
 
+import com.haoyong.admin.util.SnowflakeIdWorkerUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+
 import org.springframework.web.bind.annotation.*;
 
 
@@ -26,29 +28,43 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/admin/acl/permission")
-//@CrossOrigin
-
-public class PermissionController extends CommonController<PermissionVo, Permission,String> {
+public class PermissionController  {
 
     @Autowired
     private PermissionService permissionService;
 
-    //获取全部菜单
-
+    //根据角色获取菜单(树形结构)
     @GetMapping
 //    @PreAuthorize("hasAnyRole('user.list')")
-    public Result<List<PermissionVo>> getAllMenu() {
-        List<PermissionVo> list =  permissionService.queryAllMenu();
-        return Result.success(list);
+    public ResultBody<List<PermissionVo>> getAllMenu(Authentication authentication) {
+        String userId = String.valueOf(authentication.getCredentials());
+        List<PermissionVo> list =  permissionService.selectMenuTreeByUserId(userId);
+        return ResultBody.success(list);
     }
 
+    //删除菜单
+    @DeleteMapping("/remove/{id}")
+    public ResultBody<Object> delete(@PathVariable String id) {
+        boolean delete = permissionService.delete(id);
+        if (delete) {
+            return ResultBody.success();
+        }
+        return ResultBody.error(CommonEnum.NOT_DEL_SUB);
 
-    public Result<String> delete(@PathVariable String id) {
-        return permissionService.delete(id);
     }
 
     /**
-    * @Description:
+     *
+     *根据角色获取菜单
+     */
+    @GetMapping("toAssign/{roleId}")
+    public ResultBody<List<PermissionVo>> toAssign(@PathVariable String roleId) {
+        List<PermissionVo> list = permissionService.selectAllMenu(roleId);
+        return ResultBody.success(list);
+    }
+
+    /**
+    * @Description:给角色分配权限
 
     * @return:
     * @Author: dong
@@ -56,35 +72,33 @@ public class PermissionController extends CommonController<PermissionVo, Permiss
     */
 
     @PostMapping("/doAssign")
-    public Result doAssign(@RequestBody RolePermissionDTO rolePermissionDTO) {
+    public ResultBody<Object> doAssign(@RequestBody RolePermissionDTO rolePermissionDTO) {
         String roleId = rolePermissionDTO.getRoleid();
         String permissionid = rolePermissionDTO.getPermissionid();
         permissionService.saveRolePermissionRealtionShip(roleId,permissionid);
-        return Result.success("操作成功");
+        return ResultBody.success();
     }
 
-//    @ApiOperation(value = "根据角色获取菜单")
-//////    @GetMapping("toAssign/{roleId}")
-//////    public R toAssign(@PathVariable String roleId) {
-//////        List<Permission> list = permissionService.selectAllMenu(roleId);
-//////        return R.ok().data("children", list);
-//////    }
+    //新增菜单
+    @PostMapping("save")
+    public ResultBody<Object> save(@RequestBody Permission permission) {
+        permission.setId(String.valueOf(SnowflakeIdWorkerUtil.getInstance().nextId()));
+        boolean b = permissionService.addMenu(permission);
+        if (b) {
+            return ResultBody.success();
+        }
+        return ResultBody.error();
+    }
 
 
+    //修改菜单
+    @PutMapping("update")
+    public ResultBody<Object> updateById(@RequestBody Permission permission) {
+        boolean b = permissionService.updateMenu(permission);
+        if (b) return ResultBody.success();
+        return ResultBody.error();
 
-//    @ApiOperation(value = "新增菜单")
-//    @PostMapping("save")
-//    public R save(@RequestBody Permission permission) {
-//        permissionService.save(permission);
-//        return R.ok();
-//    }
-
-//    @ApiOperation(value = "修改菜单")
-//    @PutMapping("update")
-//    public R updateById(@RequestBody Permission permission) {
-//        permissionService.updateById(permission);
-//        return R.ok();
-//    }
+    }
 
 }
 

@@ -32,12 +32,8 @@ public class PermissionHelper {
 
             if ("0".equals(treeNode.getPid())) {
 
-                Map<String,Object> map = new HashMap<>();
 
-                map.put("title",treeNode.getName());
-                map.put("icon",treeNode.getIcon());
-                treeNode.setMeta(map);
-
+                treeNode.setLevel(1);
                 trees.add(findChildren(treeNode,treeNodes));
             }
         }
@@ -56,22 +52,21 @@ public class PermissionHelper {
         for (PermissionVo it : treeNodes) {
             if(treeNode.getId().equals(it.getPid())) {
 
-
+                //把父菜单的level值+1
+                int level = treeNode.getLevel()+1;
+                it.setLevel(level);
                 if (treeNode.getChildren() == null) {
                     treeNode.setChildren(new ArrayList<>());
-                }
 
+                }
                 treeNode.getChildren().add(findChildren(it,treeNodes));
 
-
             }
-            Map<String,Object> map = new HashMap<>();
-
-            map.put("title",treeNode.getName());
-            map.put("icon",treeNode.getIcon());
-            treeNode.setMeta(map);
 
         }
         return treeNode;
     }
+
+
+
 }

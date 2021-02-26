@@ -1,10 +1,12 @@
 package com.haoyong.admin.sys.service.impl;
 
-import com.haoyong.admin.common.pojo.Result;
-import com.haoyong.admin.common.service.impl.CommonServiceImpl;
+
+import com.alibaba.fastjson.JSONObject;
 import com.haoyong.admin.sys.domain.Permission;
 import com.haoyong.admin.sys.domain.RolePermission;
 import com.haoyong.admin.sys.domain.User;
+
+import com.haoyong.admin.sys.helper.MenuHelper;
 import com.haoyong.admin.sys.helper.PermissionHelper;
 import com.haoyong.admin.sys.repository.SysPermissionRepository;
 import com.haoyong.admin.sys.repository.SysRolePermissionRepository;
@@ -12,6 +14,7 @@ import com.haoyong.admin.sys.service.PermissionService;
 import com.haoyong.admin.sys.service.UserService;
 import com.haoyong.admin.sys.vo.PermissionVo;
 import com.haoyong.admin.util.CopyUtil;
+import com.haoyong.admin.util.SnowflakeIdWorkerUtil;
 import com.haoyong.admin.util.UUIDUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +38,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
-public class PermissionServiceImpl extends CommonServiceImpl<PermissionVo, Permission,String> implements PermissionService {
+public class PermissionServiceImpl  implements PermissionService {
 
         @Autowired
         SysPermissionRepository sysPermissionRepository;
@@ -57,41 +60,28 @@ public class PermissionServiceImpl extends CommonServiceImpl<PermissionVo, Permi
 
         return result;
     }
-
     //根据角色获取菜单
-//    @Override
-//    public List<Permission> selectAllMenu(String roleId) {
-//        List<Permission> allPermissionList = baseMapper.selectList(new QueryWrapper<Permission>().orderByAsc("CAST(id AS SIGNED)"));
-//
-//        //根据角色id获取角色权限
-//        List<RolePermission> rolePermissionList = rolePermissionService.list(new QueryWrapper<RolePermission>().eq("role_id",roleId));
-//        //转换给角色id与角色权限对应Map对象
-////        List<String> permissionIdList = rolePermissionList.stream().map(e -> e.getPermissionId()).collect(Collectors.toList());
-////        allPermissionList.forEach(permission -> {
-////            if(permissionIdList.contains(permission.getId())) {
-////                permission.setSelect(true);
-////            } else {
-////                permission.setSelect(false);
-////            }
-////        });
-//        for (int i = 0; i < allPermissionList.size(); i++) {
-//            Permission permission = allPermissionList.get(i);
-//            for (int m = 0; m < rolePermissionList.size(); m++) {
-//                RolePermission rolePermission = rolePermissionList.get(m);
-//                if(rolePermission.getPermissionId().equals(permission.getId())) {
-//                    permission.setSelect(true);
-//                }
-//            }
-//        }
-//
-//
-//        List<Permission> permissionList = bulid(allPermissionList);
-//        return permissionList;
-//    }
+    @Override
+    public List<PermissionVo> selectAllMenu(String roleId) {
+        List<Permission> permissions = sysPermissionRepository.findAll();
+        List<RolePermission> rolePermissionList = sysRolePermissionRepository.findByRoleId(roleId);
+        List<PermissionVo> permissionVos = CopyUtil.copyList(permissions, PermissionVo.class);
+        for (int i = 0; i < permissionVos.size(); i++) {
+            PermissionVo permissionVo = permissionVos.get(i);
+            for (int i1 = 0; i1 < rolePermissionList.size(); i1++) {
+                RolePermission rolePermission = rolePermissionList.get(i1);
+                if (rolePermission.getPermissionId().equals(permissionVo.getId())) {
+                    permissionVo.setSelect(true);
+                }
+            }
+        }
+        List<PermissionVo> permissionVoList = PermissionHelper.getInstance().bulid(permissionVos);
+        return permissionVoList;
+    }
 
     //给角色分配权限
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void saveRolePermissionRealtionShip(String roleId, String permissionIds) {
         List<RolePermission> ret = sysRolePermissionRepository.findByRoleId(roleId);
         //原来角色的权限
@@ -121,7 +111,7 @@ public class PermissionServiceImpl extends CommonServiceImpl<PermissionVo, Permi
                 RolePermission rolePermission = new RolePermission();
                 rolePermission.setRoleId(roleId);
                 rolePermission.setPermissionId(permissionId);
-                rolePermission.setId(UUIDUtil.getUUID());
+                rolePermission.setId(String.valueOf(SnowflakeIdWorkerUtil.getInstance().nextId()));
                 rolePermissionList.add(rolePermission);
             }
             sysRolePermissionRepository.saveAll(rolePermissionList);
@@ -129,19 +119,28 @@ public class PermissionServiceImpl extends CommonServiceImpl<PermissionVo, Permi
 
     }
 
-    //递归删除菜单
     @Override
-    @Transactional
-    public Result<String> delete(String id) {
-        List<String> idList = new ArrayList<>();
-        this.selectChildListById(id, idList);
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateMenu(Permission permission) {
+        Permission permission1 = sysPermissionRepository.save(permission);
 
-        idList.add(id);
-        sysPermissionRepository.deleteByIdIn(idList);
-        return Result.success(id);
+        if (permission1 != null) return true;
+        return false;
     }
 
-//    //根据用户id获取用户菜单
+    //递归删除菜单
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean delete(String id) {
+        List<Permission> permissionList = sysPermissionRepository.findByPid(id);
+        if (!permissionList.isEmpty()) return false;
+        sysPermissionRepository.deleteById(id);
+        sysRolePermissionRepository.deleteByPermissionId(id);
+        return true;
+
+    }
+
+    //    //根据用户id获取用户菜单
     @Override
     public List<String> selectPermissionValueByUserId(String id) {
 
@@ -155,19 +154,47 @@ public class PermissionServiceImpl extends CommonServiceImpl<PermissionVo, Permi
         return selectPermissionValueList;
     }
 
+
+
+
+
+    /**
+     *
+     *树形结构
+     */
     @Override
-    public List<PermissionVo> selectPermissionByUserId(String userId) {
+    public List<PermissionVo> selectMenuTreeByUserId(String id) {
         List<Permission> selectPermissionList = null;
-        if(this.isSysAdmin(userId)) {
+        if(this.isSysAdmin(id)) {
             //如果是超级管理员，获取所有菜单
             selectPermissionList = sysPermissionRepository.findAll();
         } else {
-            selectPermissionList = sysPermissionRepository.findPermissionByUserId(userId);
+            selectPermissionList = sysPermissionRepository.findPermissionByUserId(id);
         }
         List<PermissionVo> permissionVos = CopyUtil.copyList(selectPermissionList, PermissionVo.class);
         List<PermissionVo> permissionVoList = PermissionHelper.getInstance().bulid(permissionVos);
 
         return permissionVoList;
+    }
+
+    /**
+     *
+     *后台左侧菜单栏
+     */
+    @Override
+    public List<JSONObject> selectAdminMenu(String id) {
+        List<Permission> selectPermissionList = null;
+        if(this.isSysAdmin(id)) {
+            //如果是超级管理员，获取所有菜单
+            selectPermissionList = sysPermissionRepository.findAll();
+        } else {
+            selectPermissionList = sysPermissionRepository.findPermissionByUserId(id);
+        }
+        List<PermissionVo> permissionVos = CopyUtil.copyList(selectPermissionList, PermissionVo.class);
+        List<PermissionVo> permissionVoList = PermissionHelper.getInstance().bulid(permissionVos);
+        return MenuHelper.getInstance().bulid(permissionVoList);
+
+
     }
 
     /**
@@ -197,50 +224,21 @@ public class PermissionServiceImpl extends CommonServiceImpl<PermissionVo, Permi
         });
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean addMenu(Permission permission) {
+        Permission permission1 = sysPermissionRepository.saveAndFlush(permission);
+        RolePermission rolePermission = new RolePermission();
+        rolePermission.setId(String.valueOf(SnowflakeIdWorkerUtil.getInstance().nextId()));
+        rolePermission.setRoleId("1");
+        rolePermission.setPermissionId(permission.getId());
+        RolePermission rolePermission1 = sysRolePermissionRepository.saveAndFlush(rolePermission);
+        if (permission1!=null && rolePermission1 !=null) {
+            return  true;
+        }
+        return false;
 
+    }
 
-
-
-//
-//    private static Permission selectChildren(Permission permissionNode, List<Permission> permissionList) {
-//        //1 因为向一层菜单里面放二层菜单，二层里面还要放三层，把对象初始化
-//        permissionNode.setChildren(new ArrayList<Permission>());
-//
-//        //2 遍历所有菜单list集合，进行判断比较，比较id和pid值是否相同
-//        for(Permission it : permissionList) {
-//            //判断 id和pid值是否相同
-//            if(permissionNode.getId().equals(it.getPid())) {
-//                //把父菜单的level值+1
-//                int level = permissionNode.getLevel()+1;
-//                it.setLevel(level);
-//                //如果children为空，进行初始化操作
-//                if(permissionNode.getChildren() == null) {
-//                    permissionNode.setChildren(new ArrayList<Permission>());
-//                }
-//                //把查询出来的子菜单放到父菜单里面
-//                permissionNode.getChildren().add(selectChildren(it,permissionList));
-//            }
-//        }
-//        return permissionNode;
-//    }
-//
-
-//
-//    //2 根据当前菜单id，查询菜单里面子菜单id，封装到list集合
-//    private void selectPermissionChildById(String id, List<String> idList) {
-//        //查询菜单里面子菜单id
-//        QueryWrapper<Permission>  wrapper = new QueryWrapper<>();
-//        wrapper.eq("pid",id);
-//        wrapper.select("id");
-//        List<Permission> childIdList = baseMapper.selectList(wrapper);
-//        //把childIdList里面菜单id值获取出来，封装idList里面，做递归查询
-//        childIdList.stream().forEach(item -> {
-//            //封装idList里面
-//            idList.add(item.getId());
-//            //递归查询
-//            this.selectPermissionChildById(item.getId(),idList);
-//        });
-//    }
-//
 
 }

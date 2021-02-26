@@ -1,5 +1,6 @@
 package com.haoyong.admin.sys.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.haoyong.admin.sys.domain.Role;
 import com.haoyong.admin.sys.domain.User;
 import com.haoyong.admin.sys.service.IndexService;
@@ -17,7 +18,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-public class IndexServiceImpl implements IndexService {
+public class IndexServiceImpl implements IndexService{
 
     @Autowired
     private UserService userService;
@@ -37,7 +38,7 @@ public class IndexServiceImpl implements IndexService {
      * @param username
      * @return
      */
-    @Override
+
     public Map<String, Object> getUserInfo(String username) {
         Map<String, Object> result = new HashMap<>();
         User user = userService.selectByUsername(username);
@@ -54,13 +55,13 @@ public class IndexServiceImpl implements IndexService {
         }
 
         //根据用户id获取操作权限值
-//        List<String> permissionValueList = permissionService.selectPermissionValueByUserId(user.getId());
+        List<String> permissionValueList = permissionService.selectPermissionValueByUserId(user.getId());
 //        redisTemplate.opsForValue().set(username, permissionValueList);
 
         result.put("name", user.getUsername());
         result.put("avatar", user.getSalt());
         result.put("roles", roleNameList);
-//        result.put("permissionValueList", permissionValueList);
+        result.put("permissionValueList", permissionValueList);
         return result;
     }
 
@@ -69,12 +70,12 @@ public class IndexServiceImpl implements IndexService {
      * @param username
      * @return
      */
-    public List<PermissionVo> getMenu(String username) {
+    public List<JSONObject> getMenu(String username) {
         User user = userService.selectByUsername(username);
 
         //根据用户id获取用户菜单权限
-        List<PermissionVo> permissionVos = permissionService.selectPermissionByUserId(user.getId());
-        return permissionVos;
+       return permissionService.selectAdminMenu(user.getId());
+
     }
 
 

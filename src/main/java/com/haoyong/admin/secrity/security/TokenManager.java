@@ -1,22 +1,18 @@
 package com.haoyong.admin.secrity.security;
 
-import com.haoyong.admin.Enum.ResultStatus;
-import com.haoyong.admin.exception.ResultException;
-import com.haoyong.admin.infrastructure.RedisKey;
+
+import com.haoyong.admin.Enum.CommonEnum;
+import com.haoyong.admin.exception.BizException;
+
 import io.jsonwebtoken.*;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.cache.CacheProperties;
-import org.springframework.data.redis.core.RedisTemplate;
+
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.StringJoiner;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
+
 
 /**
  * <p>
@@ -50,7 +46,7 @@ public class TokenManager {
                     .compressWith(CompressionCodecs.GZIP).compact();
         } catch (Exception e) {
 
-            throw new ResultException(ResultStatus.BAD_REQUEST,"签名失败");
+            throw new BizException(CommonEnum.SIGNATURE_NOT_MATCH);
         }
 
         return  token;
@@ -66,9 +62,9 @@ public class TokenManager {
                     .getBody();
             return claims;
         } catch (ExpiredJwtException e) {
-            throw new ResultException(ResultStatus.BAD_REQUEST,"token过期,请重新登录");
+            throw new BizException(CommonEnum.BODY_NOT_MATCH.getResultCode(),"token过期,请重新登录");
         } catch (Exception e) {
-            throw new ResultException(ResultStatus.BAD_REQUEST,"token解析异常");
+            throw new BizException(CommonEnum.BODY_NOT_MATCH.getResultCode(),"token解析异常");
         }
     }
 

@@ -1,7 +1,10 @@
 package com.haoyong.admin.log.repository;
 
-import com.haoyong.admin.common.repository.CommonRepository;
+
 import com.haoyong.admin.log.domain.ExcLog;
+import com.haoyong.admin.sys.domain.Role;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -12,5 +15,5 @@ import org.springframework.stereotype.Repository;
  * @create: 2020-12-21 11:00
  **/
 @Repository
-public interface SysExcLogRepository extends CommonRepository<ExcLog,String> {
+public interface SysExcLogRepository extends JpaRepository<ExcLog,String>, JpaSpecificationExecutor<ExcLog> {
 }

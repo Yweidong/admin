@@ -66,4 +66,8 @@ public class MD5Util {
     private static boolean verify(String text, String md5){
         return md5.equals(getMD5(text));
     }
+
+    public static void main(String[] args) {
+        System.out.println(MD5Util.encrypt("111111"));
+    }
 }

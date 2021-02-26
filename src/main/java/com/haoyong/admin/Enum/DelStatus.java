@@ -1,10 +1,13 @@
 package com.haoyong.admin.Enum;
 
 public enum DelStatus {
-    Y(1),N(1);
-    private Integer value;
-
-    DelStatus(Integer value) {
-        this.value = value;
+    Y("Y"),//已删除
+    N("N");//未删除
+    private String value;
+    DelStatus(String value) {
+         this.value = value;
+    }
+    public String getValue() {
+        return value;
     }
 }

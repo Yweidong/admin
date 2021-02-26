@@ -1,14 +1,18 @@
 package com.haoyong.admin.sys.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.haoyong.admin.Enum.DelStatus;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.Date;
+import java.util.*;
 
 /**
  * @Description
@@ -18,6 +22,8 @@ import java.util.Date;
 
 @Entity
 @Table ( name ="sys_role" )
+@DynamicUpdate
+@DynamicInsert
 @EntityListeners(AuditingEntityListener.class)
 public class Role implements Serializable {
 
@@ -34,6 +40,7 @@ public class Role implements Serializable {
 	 * 角色名称
 	 */
    	@Column(name = "role_name" )
+	@NotNull
 	private String roleName;
 
 	/**
@@ -70,6 +77,9 @@ public class Role implements Serializable {
 	@LastModifiedDate
 	@JsonFormat(pattern = "yyyy-MM-dd  HH:mm:ss")
 	private Date gmtModified;
+
+
+
 
 	public String getId() {
 		return this.id;

@@ -1,14 +1,17 @@
 package com.haoyong.admin.sys.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.haoyong.admin.Enum.DelStatus;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Date;
+import java.util.*;
 
 /**
  * @Description
@@ -18,6 +21,7 @@ import java.util.Date;
 
 @Entity
 @Table ( name ="sys_user" )
+@DynamicInsert
 @EntityListeners(AuditingEntityListener.class)
 public class User implements Serializable {
 
@@ -40,13 +44,10 @@ public class User implements Serializable {
 	 * 密码
 	 */
    	@Column(name = "password" )
+
 	private String password;
 
-	/**
-	 * 昵称
-	 */
-   	@Column(name = "nick_name" )
-	private String nickName;
+
 
 	/**
 	 * 用户头像
@@ -70,7 +71,7 @@ public class User implements Serializable {
 	/**
 	 * 创建时间
 	 */
-   	@Column(name = "gmt_create" )
+   	@Column(name = "gmt_create",nullable = false,updatable = false,insertable = true )
 	@CreatedDate
 	@JsonFormat(pattern = "yyyy-MM-dd  HH:mm:ss")
 	private Date gmtCreate;
@@ -83,8 +84,8 @@ public class User implements Serializable {
 	@JsonFormat(pattern = "yyyy-MM-dd  HH:mm:ss")
 	private Date gmtModified;
 
-	public User() {
-	}
+
+
 
 
 	public String getId() {
@@ -111,13 +112,7 @@ public class User implements Serializable {
 		this.password = password;
 	}
 
-	public String getNickName() {
-		return this.nickName;
-	}
 
-	public void setNickName(String nickName) {
-		this.nickName = nickName;
-	}
 
 	public String getSalt() {
 		return this.salt;
@@ -165,7 +160,6 @@ public class User implements Serializable {
 				"id='" + id + '\'' +
 				"username='" + username + '\'' +
 				"password='" + password + '\'' +
-				"nickName='" + nickName + '\'' +
 				"salt='" + salt + '\'' +
 				"token='" + token + '\'' +
 				"isDeleted='" + isDeleted + '\'' +

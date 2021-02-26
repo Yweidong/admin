@@ -27,10 +27,10 @@ public class PermissionVo {
     private String component;
     private String icon;
     private Integer status;
-//    private Integer level;
-    private Map<String,Object> meta;
-    private Date gmtCreate;
+    private Integer level;
 
+    private boolean isSelect;
+    private Date gmtCreate;
 
     private Date gmtModified;
 

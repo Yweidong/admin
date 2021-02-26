@@ -52,7 +52,7 @@ public class UserRole implements Serializable {
 //	private DelStatus isDeleted;
 
 
-	
+
 	/**
 	 * 创建时间
 	 */
